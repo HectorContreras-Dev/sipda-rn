@@ -8,7 +8,7 @@
     "dev": "ts-node-dev --respawn src/server.ts"
   },
   "keywords": [],
-  "author": "Hector Javier Contreras Rodriguez | Saul Oswaldo Alviso Miranda",
+  "author": "Hector Javier Contreras Rodriguez | Saul Oswaldo Alvizo Miranda",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {

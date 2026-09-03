@@ -16,10 +16,6 @@ app.get("/health", (_req, res) => {
 
 import { pool } from "./config/db";
 
-pool.query("SELECT NOW()")
-  .then((res) => console.log("Conectado a la base de datos:", res.rows[0]))
-  .catch((err) => console.error("Error conectando a la base de datos:", err));
-
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
