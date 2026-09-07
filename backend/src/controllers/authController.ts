@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import { z } from "zod";
 import { pool } from "../config/db";
 import { generateToken } from "../utils/jwt";
+import { AuthRequest } from "../middlewares/authMiddleware";
 
 //Validacion de datos de registro con Zod / REGISTRO.....................
 const registerSchema = z.object({
@@ -90,4 +91,19 @@ export async function login(req: Request, res: Response) {
     user: { id: user.id, name: user.name, email: user.email },
     token,
   });
+}
+
+//Controlador para obtener los datos del usuario autenticado / ME............
+
+export async function me(req: AuthRequest, res: Response) {
+  const result = await pool.query(
+    "SELECT id, name, email, created_at FROM users WHERE id = $1",
+    [req.userId]
+  );
+
+  if (result.rows.length === 0) {
+    return res.status(404).json({ error: "Usuario no encontrado" });
+  }
+
+  res.status(200).json({ user: result.rows[0] });
 }
