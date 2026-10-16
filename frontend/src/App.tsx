@@ -3,6 +3,7 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import HomePage from './pages/HomePage'
 import ProtectedRoute from './components/ProtectedRoute'
+import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
   return (
@@ -18,7 +19,7 @@ function App() {
         }
       />
 
-      <Route path="*" element={<h1>Página no encontrada</h1>} />
+     <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }
