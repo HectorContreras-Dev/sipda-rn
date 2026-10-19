@@ -5,11 +5,21 @@ import { pool } from "../config/db";
 import { generateToken } from "../utils/jwt";
 import { AuthRequest } from "../middlewares/authMiddleware";
 
+//Schemas reutilizables para normalizar datos.....................
+const emailSchema = z.string().trim().toLowerCase().email().max(150);
+
+const nameSchema = z
+  .string()
+  .trim()
+  .min(2)
+  .max(100)
+  .transform((value) => value.replace(/\s+/g, " "));
+
 //Validacion de datos de registro con Zod / REGISTRO.....................
 const registerSchema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
-  password: z.string().min(6),
+  name: nameSchema,
+  email: emailSchema,
+  password: z.string().min(6).max(72),
 });
 
 //Controlador para el registro de usuarios
@@ -50,7 +60,7 @@ export async function register(req: Request, res: Response) {
 
 //Validacion de datos de login con Zod
 const loginSchema = z.object({
-  email: z.string().email(),
+  email: emailSchema,
   password: z.string().min(1),
 });
 
