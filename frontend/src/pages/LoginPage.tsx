@@ -10,22 +10,32 @@ function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
+    setMessage('')
+    setIsLoading(true)
 
-    const response = await fetch('http://localhost:3000/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    })
+    try {
+      const response = await fetch('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
 
-    const data = await response.json()
-    if (response.ok) {
-      localStorage.setItem('token', data.token)
-      navigate('/home')
-    } else {
-      setMessage(data.error)
+      const data = await response.json()
+
+      if (response.ok) {
+        localStorage.setItem('token', data.token)
+        navigate('/home')
+      } else {
+        setMessage(data.error)
+      }
+    } catch {
+      setMessage('No se pudo conectar con el servidor. Intenta más tarde.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -43,6 +53,7 @@ function LoginPage() {
             <input
               id="email"
               type="email"
+              autoComplete="email"
               placeholder="correo@ejemplo.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -57,6 +68,7 @@ function LoginPage() {
             <input
               id="password"
               type="password"
+              autoComplete="current-password"
               placeholder="Tu contraseña"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -66,9 +78,10 @@ function LoginPage() {
 
           <button
             type="submit"
-            className="mt-1 w-full cursor-pointer rounded-xl bg-contrast px-4 py-3 font-bold text-black shadow-md shadow-contrast/40 transition hover:bg-contrast/80 hover:text-white active:scale-[0.98] dark:hover:text-white"
+            disabled={isLoading}
+            className="mt-1 w-full cursor-pointer rounded-xl bg-contrast px-4 py-3 font-bold text-black shadow-md shadow-contrast/40 transition hover:bg-contrast/80 hover:text-white active:scale-[0.98] dark:hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Iniciar sesión
+            {isLoading ? 'Entrando…' : 'Iniciar sesión'}
           </button>
         </form>
 
