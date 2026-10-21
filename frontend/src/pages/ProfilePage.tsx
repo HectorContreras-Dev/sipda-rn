@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import AppLayout from '../components/AppLayout'
 import AttemptsCard from '../components/AttemptsCard'
+import { API_URL } from '../config'
 
 interface User {
   id: number
@@ -32,7 +33,7 @@ function ProfilePage() {
       const token = localStorage.getItem('token')
 
       try {
-        const response = await fetch('http://localhost:3000/api/auth/me', {
+        const response = await fetch(`${API_URL}/api/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
         })
 
@@ -58,6 +59,13 @@ function ProfilePage() {
 
   return (
     <AppLayout userName={user?.name}>
+      <Link
+        to="/home"
+        className="mb-6 inline-flex items-center gap-2 rounded-xl px-4 py-2 font-bold text-primary transition hover:bg-secondary/20"
+      >
+        ← Volver a inicio
+      </Link>
+
       {error && (
         <p
           role="alert"

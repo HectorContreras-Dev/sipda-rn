@@ -45,10 +45,20 @@ export async function register(req: Request, res: Response) {
   const passwordHash = await bcrypt.hash(password, 10);
 
   //Insercion de usuario en la base de datos y generacion de token JWT
-  const result = await pool.query(
-    "INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email",
-    [name, email, passwordHash]
-  );
+  let result;
+  try {
+    result = await pool.query(
+      "INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email",
+      [name, email, passwordHash]
+    );
+  } catch (error) {
+    //23505 = correo duplicado (dos registros iguales al mismo tiempo)
+    if (error instanceof Error && "code" in error && error.code === "23505") {
+      return res.status(409).json({ error: "Ya existe un usuario con ese correo" });
+    }
+    //Otros errores los atrapa el middleware de errores de server.ts
+    throw error;
+  }
 
   const newUser = result.rows[0];
   const token = generateToken(newUser.id);
