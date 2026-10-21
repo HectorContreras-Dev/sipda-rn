@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AppLayout from '../components/AppLayout'
 import LetterGrid from '../components/LetterGrid'
+import { API_URL } from '../config'
 
 interface User {
   id: number
@@ -24,7 +25,7 @@ function HomePage() {
       const token = localStorage.getItem('token')
 
       try {
-        const response = await fetch('http://localhost:3000/api/auth/me', {
+        const response = await fetch(`${API_URL}/api/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
         })
 

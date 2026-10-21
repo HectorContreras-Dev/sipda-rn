@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout'
+import Input from '../components/Input'
+import { API_URL } from '../config'
 
 
 function LoginPage() {
@@ -18,7 +20,7 @@ function LoginPage() {
     setIsLoading(true)
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -46,35 +48,27 @@ function LoginPage() {
         <h1 className="text-3xl font-extrabold text-black dark:text-white text-center">Iniciar sesión</h1>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="email" className="text-sm font-semibold text-black dark:text-white">
-              Correo
-            </label>
-            <input
-              id="email"
-              type="email"
-              autoComplete="email"
-              placeholder="correo@ejemplo.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-xl border border-secondary/50 bg-white px-4 py-3 text-black placeholder:text-black/40 focus:border-contrast focus:outline-none focus:ring-4 focus:ring-contrast/20 dark:bg-black/40 dark:text-white dark:placeholder:text-white/50"
-            />
-          </div>
+          <Input
+            id="email"
+            label="Correo"
+            type="email"
+            required
+            autoComplete="email"
+            placeholder="correo@ejemplo.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="password" className="text-sm font-semibold text-black dark:text-white">
-              Contraseña
-            </label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              placeholder="Tu contraseña"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border border-secondary/50 bg-white px-4 py-3 text-black placeholder:text-black/40 focus:border-contrast focus:outline-none focus:ring-4 focus:ring-contrast/20 dark:bg-black/40 dark:text-white dark:placeholder:text-white/50"
-            />
-          </div>
+          <Input
+            id="password"
+            label="Contraseña"
+            type="password"
+            required
+            autoComplete="current-password"
+            placeholder="Tu contraseña"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
           <button
             type="submit"
