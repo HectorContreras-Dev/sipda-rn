@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage'
 import ProtectedRoute from './components/ProtectedRoute'
 import NotFoundPage from './pages/NotFoundPage'
 import ProfilePage from './pages/ProfilePage'
+import PracticePage from './pages/PracticePage'
 
 function App() {
   return (
@@ -19,6 +20,15 @@ function App() {
         element={
           <ProtectedRoute>
             <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+      {/* :letter es un parámetro: /practice/A, /practice/B... */}
+      <Route
+        path="/practice/:letter"
+        element={
+          <ProtectedRoute>
+            <PracticePage />
           </ProtectedRoute>
         }
       />

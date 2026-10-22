@@ -2,8 +2,11 @@ import type { ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import logo from '../assets/LOGO-SIPDA.png'
 
-function AppLayout({ children, userName }: { children: ReactNode; userName?: string }) {
+// fullScreen: para la práctica con cámara. Más ancho y, en pantallas grandes,
+// la página mide exactamente el alto de la ventana (sin scroll)
+function AppLayout({ children, userName, fullScreen = false }: { children: ReactNode; userName?: string; fullScreen?: boolean }) {
   const navigate = useNavigate()
+  const maxWidth = fullScreen ? 'max-w-[1600px]' : 'max-w-6xl'
   const nameParts = userName?.split(' ') ?? []
   const firstName = nameParts[0]
   const restOfName = nameParts.slice(1).join(' ')
@@ -13,9 +16,9 @@ function AppLayout({ children, userName }: { children: ReactNode; userName?: str
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-secondary/25 dark:bg-black">
+    <div className={`flex min-h-screen flex-col bg-secondary/25 dark:bg-black ${fullScreen ? 'lg:h-dvh' : ''}`}>
       <header className="group border-b border-secondary/40 bg-white dark:bg-primary/10">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+        <div className={`mx-auto flex ${maxWidth} items-center justify-between px-4 py-3`}>
           <Link to="/home" aria-label="Ir al inicio">
             <img
               src={logo}
@@ -52,9 +55,20 @@ function AppLayout({ children, userName }: { children: ReactNode; userName?: str
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
+      <main
+        className={`mx-auto w-full ${maxWidth} flex-1 px-4 ${
+          fullScreen ? 'flex flex-col py-4 lg:min-h-0' : 'py-8'
+        }`}
+      >
+        {children}
+      </main>
 
-      <footer className="py-6 text-center text-sm text-black/70 dark:text-white/60">
+      {/* En fullScreen el footer es más compacto para que quepa sin scroll */}
+      <footer
+        className={`text-center text-black/70 dark:text-white/60 ${
+          fullScreen ? 'py-2 text-xs' : 'py-6 text-sm'
+        }`}
+      >
         © 2026 SIPDA-RN. Todos los derechos reservados.
       </footer>
     </div>

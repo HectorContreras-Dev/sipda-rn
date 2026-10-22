@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { difficultyLabels, type Letter } from '../data/letters'
 
 interface LetterModalProps {
@@ -83,13 +84,12 @@ function LetterModal({ letter, onClose, onPrev, onNext }: LetterModalProps) {
               {difficultyLabels[letter.difficulty]}
             </span>
 
-            <button
-              type="button"
-              disabled
-              className="mt-6 w-full rounded-xl bg-contrast px-4 py-3 font-bold text-black opacity-60 shadow-md shadow-contrast/40 disabled:cursor-not-allowed"
+            <Link
+              to={`/practice/${letter.letter}`}
+              className="mt-6 block w-full rounded-xl bg-contrast px-4 py-3 text-center font-bold text-black shadow-md shadow-contrast/40 transition hover:bg-contrast/80 hover:text-white active:scale-[0.98] dark:hover:text-white"
             >
-              Practicar con cámara · Próximamente
-            </button>
+              Practicar con cámara
+            </Link>
           </div>
         </div>
 
