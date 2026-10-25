@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import AppLayout from '../components/AppLayout'
 import AttemptsCard from '../components/AttemptsCard'
 import { API_URL } from '../config'
+import DangerZone from '../components/DangerZone'
 
 interface User {
   id: number
@@ -118,6 +119,7 @@ function ProfilePage() {
               )}
             </div>
           </section>
+          <DangerZone />
         </>
       )}
     </AppLayout>
