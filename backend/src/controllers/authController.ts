@@ -127,3 +127,48 @@ export async function me(req: AuthRequest, res: Response) {
 
   res.status(200).json({ user: result.rows[0] });
 }
+
+//Controlador para eliminar la cuenta del usuario autenticado / DELETE ME....
+
+//Se pide la contraseña para confirmar que es el dueño de la cuenta
+const deleteAccountSchema = z.object({
+  password: z.string().min(1),
+});
+
+export async function deleteAccount(req: AuthRequest, res: Response) {
+  const parseResult = deleteAccountSchema.safeParse(req.body);
+
+  if (!parseResult.success) {
+    return res.status(400).json({ error: "Escribe tu contraseña para confirmar" });
+  }
+
+  const result = await pool.query("SELECT password_hash FROM users WHERE id = $1", [req.userId]);
+
+  if (result.rows.length === 0) {
+    return res.status(404).json({ error: "Usuario no encontrado" });
+  }
+
+  const passwordMatches = await bcrypt.compare(parseResult.data.password, result.rows[0].password_hash);
+
+  if (!passwordMatches) {
+    return res.status(401).json({ error: "Contraseña incorrecta" });
+  }
+
+  //Transaccion: se borra todo o no se borra nada.
+  //Primero los intentos y resultados (apuntan a users), luego el usuario
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("DELETE FROM attempts WHERE user_id = $1", [req.userId]);
+    await client.query("DELETE FROM quiz_results WHERE user_id = $1", [req.userId]);
+    await client.query("DELETE FROM users WHERE id = $1", [req.userId]);
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+
+  res.status(204).send();
+}
