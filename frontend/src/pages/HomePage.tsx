@@ -83,7 +83,7 @@ function HomePage() {
 
       {/* Aviso de privacidad */}
       <p className="mt-10 rounded-lg border-l-4 border-contrast bg-contrast/15 px-4 py-3 text-sm font-medium text-black dark:text-white">
-        🔒 Tu cámara se procesa en tu navegador. No se envia ningun video fuera de este dispositivo.
+        🔒 Tu cámara se procesa en tu navegador. No se envía ningún video fuera de este dispositivo.
       </p>
     </AppLayout>
   )

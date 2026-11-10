@@ -61,9 +61,9 @@ function LetterModal({ letter, onClose, onPrev, onNext }: LetterModalProps) {
             />
           ) : (
             <div className="flex aspect-square w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed border-secondary/50 bg-secondary/10 text-center">
-              
+              <span className="text-5xl">✋</span>
               <p className="mt-3 text-sm font-medium text-black/60 dark:text-white/60">
-                imagen próximamente
+                Imagen de la seña próximamente
               </p>
             </div>
           )}
@@ -94,7 +94,7 @@ function LetterModal({ letter, onClose, onPrev, onNext }: LetterModalProps) {
         </div>
 
         {/* Navegación entre letras */}
-        <div className="mt-8 flex justify-between border-t border-secondary/30 pt-5">
+          <div className="mt-8 flex items-center justify-between gap-3 border-t border-secondary/30 pt-5">
           <button
             type="button"
             onClick={onPrev}
@@ -103,6 +103,16 @@ function LetterModal({ letter, onClose, onPrev, onNext }: LetterModalProps) {
           >
             ← Anterior
           </button>
+          {letter.camera_hint && (
+            <div className="flex flex-col items-center gap-1 text-center">
+              <span className="text-xs font-semibold uppercase tracking-wide text-black/60 dark:text-white/60">
+                ¿Cómo colocar la mano frente a la cámara?
+              </span>
+              <p className="rounded-full bg-contrast/15 px-4 py-1.5 text-sm font-medium text-black dark:text-white">
+                📷 {letter.camera_hint}
+              </p>
+            </div>
+          )}
           <button
             type="button"
             onClick={onNext}

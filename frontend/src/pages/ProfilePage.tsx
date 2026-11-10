@@ -64,7 +64,7 @@ function ProfilePage() {
         to="/home"
         className="mb-6 inline-flex items-center gap-2 rounded-xl px-4 py-2 font-bold text-primary transition hover:bg-secondary/20"
       >
-        ← Volver a inicio
+        ← Al inicio
       </Link>
 
       {error && (
