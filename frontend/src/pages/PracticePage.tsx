@@ -38,7 +38,7 @@ function PracticePage() {
               La cámara usa el ancho que quepa sin pasarse del alto, siempre en 16:9 */}
           <div className="flex items-center justify-center lg:min-h-0 lg:@container-size">
             <div className="w-full lg:w-[min(100cqw,calc(100cqh*16/9))]">
-              <CameraView />
+              <CameraView targetLetter={currentLetter.letter} />
             </div>
           </div>
 
@@ -47,7 +47,7 @@ function PracticePage() {
               <p className="text-sm font-semibold uppercase tracking-wide text-black/60 dark:text-white/60">
                 Practicando la letra
               </p>
-              <h1 className="text-7xl font-extrabold text-primary">{currentLetter.letter}</h1>
+              <h1 className="text-7xl font-extrabold leading-tight text-primary">{currentLetter.letter}</h1>
               <div className="my-4 h-1.5 w-16 rounded-full bg-contrast" />
               <p className="text-black/80 dark:text-white/80">{currentLetter.description}</p>
               <span className="mt-4 inline-block rounded-full bg-contrast/20 px-3 py-1 text-sm font-semibold text-black dark:text-white">
@@ -68,6 +68,13 @@ function PracticePage() {
                 ))}
               </ul>
             </div>
+            {/* Lleva al modo intento de esta misma letra */}
+            <Link
+              to={`/intento/${currentLetter.letter}`}
+              className="mt-auto rounded-xl bg-primary px-5 py-3 text-center font-bold text-white transition hover:opacity-90"
+            >
+              ¿Listo? Ponte a prueba →
+            </Link>
           </aside>
         </div>
       )}

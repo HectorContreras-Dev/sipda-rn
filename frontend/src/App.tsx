@@ -6,6 +6,9 @@ import ProtectedRoute from './components/ProtectedRoute'
 import NotFoundPage from './pages/NotFoundPage'
 import ProfilePage from './pages/ProfilePage'
 import PracticePage from './pages/PracticePage'
+import CapturePage from './pages/CapturePage'
+import TrainPage from './pages/TrainPage'
+import AttemptPage from './pages/AttemptPage'
 
 function App() {
   return (
@@ -23,6 +26,9 @@ function App() {
           </ProtectedRoute>
         }
       />
+      {/* Solo existe en desarrollo (npm run dev), no en producción */}
+      {import.meta.env.DEV && <Route path="/capture" element={<CapturePage />} />}
+      {import.meta.env.DEV && <Route path="/train" element={<TrainPage />} />}
       {/* :letter es un parámetro: /practice/A, /practice/B... */}
       <Route
         path="/practice/:letter"
@@ -32,7 +38,16 @@ function App() {
           </ProtectedRoute>
         }
       />
-     <Route path="*" element={<NotFoundPage />} />
+      {/* Modo intento: /intento/A, /intento/B... */}
+      <Route
+        path="/intento/:letter"
+        element={
+          <ProtectedRoute>
+            <AttemptPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }

@@ -52,8 +52,19 @@ function LetterModal({ letter, onClose, onPrev, onNext }: LetterModalProps) {
         </button>
 
         <div className="grid gap-8 sm:grid-cols-2">
-          {/* Imagen de la seña (pendiente) */}
-          {letter.image_url ? (
+                    {/* Video de la seña (letras con movimiento), imagen o recuadro pendiente */}
+          {letter.video_url ? (
+            <video
+              key={letter.video_url}
+              src={letter.video_url}
+              autoPlay
+              loop
+              muted
+              playsInline
+              aria-label={`Video de la seña de la letra ${letter.letter}`}
+              className="aspect-square w-full rounded-2xl object-cover"
+            />
+          ) : letter.image_url ? (
             <img
               src={letter.image_url}
               alt={`Seña de la letra ${letter.letter}`}
@@ -73,7 +84,7 @@ function LetterModal({ letter, onClose, onPrev, onNext }: LetterModalProps) {
             <p className="text-sm font-semibold uppercase tracking-wide text-black/60 dark:text-white/60">
               Letra
             </p>
-            <h2 id="letter-title" className="text-7xl font-extrabold text-primary">
+            <h2 id="letter-title" className="text-7xl leading-tight font-extrabold text-primary">
               {letter.letter}
             </h2>
             <div className="my-4 h-1.5 w-16 rounded-full bg-contrast" />
