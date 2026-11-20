@@ -5,7 +5,7 @@ import LetterModal from './LetterModal'
 function LetterGrid() {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   // Temporal: en la Fase 6 vendrá del endpoint de progreso
-  const completed = 15
+  const completed = 0
   const total = letters.length
   const percent = total > 0 ? (completed / total) * 100 : 0
 
