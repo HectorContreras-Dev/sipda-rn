@@ -1,9 +1,11 @@
 //Debe ir primero: carga el .env antes de que otros modulos lean process.env
 import "dotenv/config";
-
 import express, { type ErrorRequestHandler } from "express";
 import cors from "cors";
 import authRoutes from "./routes/authRoutes";
+import attemptRoutes from "./routes/attemptRoutes";
+import progressRoutes from "./routes/progressRoutes";
+import adminRoutes from "./routes/adminRoutes";
 
 if (!process.env.JWT_SECRET) {
   throw new Error("Falta JWT_SECRET en el archivo .env");
@@ -15,6 +17,9 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use("/api/auth", authRoutes);
+app.use("/api/attempts", attemptRoutes);
+app.use("/api/progress", progressRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });

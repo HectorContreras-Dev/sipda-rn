@@ -4,12 +4,14 @@ import { difficultyLabels, type Letter } from '../data/letters'
 
 interface LetterModalProps {
   letter: Letter
+    // true si ya la completó en el modo prueba
+  completed?: boolean
   onClose: () => void
   onPrev?: () => void
   onNext?: () => void
 }
 
-function LetterModal({ letter, onClose, onPrev, onNext }: LetterModalProps) {
+function LetterModal({ letter, completed = false, onClose, onPrev, onNext }: LetterModalProps) {
   // Bloquea el scroll de la página de atrás mientras el modal está abierto
   useEffect(() => {
     document.body.style.overflow = 'hidden'
@@ -52,8 +54,19 @@ function LetterModal({ letter, onClose, onPrev, onNext }: LetterModalProps) {
         </button>
 
         <div className="grid gap-8 sm:grid-cols-2">
-          {/* Imagen de la seña (pendiente) */}
-          {letter.image_url ? (
+                    {/* Video de la seña (letras con movimiento), imagen o recuadro pendiente */}
+          {letter.video_url ? (
+            <video
+              key={letter.video_url}
+              src={letter.video_url}
+              autoPlay
+              loop
+              muted
+              playsInline
+              aria-label={`Video de la seña de la letra ${letter.letter}`}
+              className="aspect-square w-full rounded-2xl object-cover"
+            />
+          ) : letter.image_url ? (
             <img
               src={letter.image_url}
               alt={`Seña de la letra ${letter.letter}`}
@@ -73,16 +86,23 @@ function LetterModal({ letter, onClose, onPrev, onNext }: LetterModalProps) {
             <p className="text-sm font-semibold uppercase tracking-wide text-black/60 dark:text-white/60">
               Letra
             </p>
-            <h2 id="letter-title" className="text-7xl font-extrabold text-primary">
+            <h2 id="letter-title" className="text-7xl leading-tight font-extrabold text-primary">
               {letter.letter}
             </h2>
             <div className="my-4 h-1.5 w-16 rounded-full bg-contrast" />
 
             <p className="text-black/80 dark:text-white/80">{letter.description}</p>
 
-            <span className="mt-4 w-fit rounded-full bg-contrast/20 px-3 py-1 text-sm font-semibold text-black dark:text-white">
-              {difficultyLabels[letter.difficulty]}
-            </span>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="w-fit rounded-full bg-contrast/20 px-3 py-1 text-sm font-semibold text-black dark:text-white">
+                {difficultyLabels[letter.difficulty]}
+              </span>
+              {completed && (
+                <span className="w-fit rounded-full bg-contrast px-3 py-1 text-sm font-semibold text-white dark:text-black">
+                  Completada ✓
+                </span>
+              )}
+            </div>
 
             <Link
               to={`/practice/${letter.letter}`}

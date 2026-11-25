@@ -4,7 +4,7 @@ import logo from '../assets/LOGO-SIPDA.png'
 
 // fullScreen: para la práctica con cámara. Más ancho y, en pantallas grandes,
 // la página mide exactamente el alto de la ventana (sin scroll)
-function AppLayout({ children, userName, fullScreen = false }: { children: ReactNode; userName?: string; fullScreen?: boolean }) {
+function AppLayout({ children, userName, fullScreen = false, isAdmin = false }: { children: ReactNode; userName?: string; fullScreen?: boolean; isAdmin?: boolean }) {
   const navigate = useNavigate()
   const maxWidth = fullScreen ? 'max-w-[1600px]' : 'max-w-6xl'
   const nameParts = userName?.split(' ') ?? []
@@ -37,6 +37,14 @@ function AppLayout({ children, userName, fullScreen = false }: { children: React
                   </span>
                 )}
               </div>
+            )}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white shadow-md shadow-primary/30 transition hover:bg-primary/80 dark:shadow-black/60"
+              >
+                Administración
+              </Link>
             )}
             <Link
               to="/profile"

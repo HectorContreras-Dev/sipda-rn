@@ -1,23 +1,11 @@
 import { useState } from 'react'
+import type { LetterProgress } from '../hooks/useProgress'
 
-interface LetterAttempts {
-  letter: string
-  attempts: number
-  correct: number
-}
-
-// Datos de ejemplo para ver el diseño
-// En la Fase 6 se reemplazan por los datos reales del backend
-const sampleAttempts: LetterAttempts[] = [
-  { letter: 'A', attempts: 5, correct: 4 },
-  { letter: 'B', attempts: 3, correct: 1 },
-  { letter: 'C', attempts: 2, correct: 0 },
-]
-
-function AttemptsCard() {
+// items: intentos por letra que vienen de GET /api/progress
+function AttemptsCard({ items }: { items: LetterProgress[] }) {
   const [isOpen, setIsOpen] = useState(false)
 
-  const total = sampleAttempts.reduce((sum, item) => sum + item.attempts, 0)
+  const total = items.reduce((sum, item) => sum + item.attempts, 0)
 
   return (
     <div className="rounded-3xl border border-secondary/40 bg-white p-6 shadow-lg shadow-primary/10 dark:bg-primary/10 dark:shadow-black/60">
@@ -31,7 +19,7 @@ function AttemptsCard() {
         <div>
           <p className="text-4xl font-extrabold text-primary">{total}</p>
           <p className="mt-2 font-semibold text-black dark:text-white">Intentos totales</p>
-          <p className="mt-1 text-xs text-black/50 dark:text-white/50">Datos de ejemplo</p>
+          <p className="mt-1 text-xs text-black/50 dark:text-white/50">En el modo prueba</p>
         </div>
 
         <span
@@ -50,13 +38,13 @@ function AttemptsCard() {
         }`}
       >
         <div className="overflow-hidden">
-          {sampleAttempts.length === 0 ? (
+          {items.length === 0 ? (
             <p className="mt-4 border-t border-secondary/30 pt-4 text-sm text-black/60 dark:text-white/60">
               Aún no tienes intentos. ¡Practica tu primera letra!
             </p>
           ) : (
             <ul className="mt-4 space-y-2 border-t border-secondary/30 pt-4">
-              {sampleAttempts.map((item) => (
+              {items.map((item) => (
                 <li key={item.letter} className="flex items-center gap-3">
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary/20 font-extrabold text-primary">
                     {item.letter}

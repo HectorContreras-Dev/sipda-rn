@@ -6,6 +6,12 @@ import ProtectedRoute from './components/ProtectedRoute'
 import NotFoundPage from './pages/NotFoundPage'
 import ProfilePage from './pages/ProfilePage'
 import PracticePage from './pages/PracticePage'
+import CapturePage from './pages/CapturePage'
+import TrainPage from './pages/TrainPage'
+import TrainMotionPage from './pages/TrainMotionPage'
+import AttemptPage from './pages/AttemptPage'
+import CaptureMotionPage from './pages/CaptureMotionPage'
+import AdminPage from './pages/AdminPage'
 
 function App() {
   return (
@@ -23,6 +29,19 @@ function App() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminPage />
+          </ProtectedRoute>
+        }
+      />
+      {/* Solo existe en desarrollo (npm run dev), no en producción */}
+      {import.meta.env.DEV && <Route path="/capture" element={<CapturePage />} />}
+      {import.meta.env.DEV && <Route path="/train" element={<TrainPage />} />}
+      {import.meta.env.DEV && <Route path="/capture-motion" element={<CaptureMotionPage />} />}
+      {import.meta.env.DEV && <Route path="/train-motion" element={<TrainMotionPage />} />}
       {/* :letter es un parámetro: /practice/A, /practice/B... */}
       <Route
         path="/practice/:letter"
@@ -32,7 +51,16 @@ function App() {
           </ProtectedRoute>
         }
       />
-     <Route path="*" element={<NotFoundPage />} />
+      {/* Modo intento: /intento/A, /intento/B... */}
+      <Route
+        path="/intento/:letter"
+        element={
+          <ProtectedRoute>
+            <AttemptPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }

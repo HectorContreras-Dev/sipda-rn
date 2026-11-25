@@ -18,6 +18,7 @@ const nameSchema = z
 //Validacion de datos de registro con Zod / REGISTRO.....................
 const registerSchema = z.object({
   name: nameSchema,
+  last_name: nameSchema,
   email: emailSchema,
   password: z.string().min(6).max(72),
 });
@@ -32,7 +33,7 @@ export async function register(req: Request, res: Response) {
     return res.status(400).json({ error: "Datos inválidos", details: parseResult.error.issues });
   }
 
-  const { name, email, password } = parseResult.data;
+  const { name, last_name, email, password } = parseResult.data;
 
   //Verificacion de correo existente
   const existingUser = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
@@ -48,8 +49,8 @@ export async function register(req: Request, res: Response) {
   let result;
   try {
     result = await pool.query(
-      "INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email",
-      [name, email, passwordHash]
+      "INSERT INTO users (name, last_name, email, password_hash) VALUES ($1, $2, $3, $4) RETURNING id, name, last_name, email",
+      [name, last_name, email, passwordHash]
     );
   } catch (error) {
     //23505 = correo duplicado (dos registros iguales al mismo tiempo)
@@ -86,7 +87,7 @@ export async function login(req: Request, res: Response) {
 
   //Verificacion de usuario y contraseña en la base de datos
   const result = await pool.query(
-    "SELECT id, name, email, password_hash FROM users WHERE email = $1",
+    "SELECT id, name, last_name, email, password_hash, blocked_at FROM users WHERE email = $1",
     [email]
   );
 
@@ -102,13 +103,18 @@ export async function login(req: Request, res: Response) {
     return res.status(401).json({ error: "Correo o contraseña incorrectos" });
   }
 
+    //Cuenta bloqueada por un administrador
+  if (user.blocked_at) {
+    return res.status(403).json({ error: "Tu cuenta está bloqueada" });
+  }
+
   //Generacion de token JWT para el usuario autenticado
   const token = generateToken(user.id);
 
 
   //Envio de respuesta con el token y los datos del usuario
   res.status(200).json({
-    user: { id: user.id, name: user.name, email: user.email },
+    user: { id: user.id, name: user.name, last_name: user.last_name, email: user.email },
     token,
   });
 }
@@ -117,7 +123,7 @@ export async function login(req: Request, res: Response) {
 
 export async function me(req: AuthRequest, res: Response) {
   const result = await pool.query(
-    "SELECT id, name, email, created_at FROM users WHERE id = $1",
+    "SELECT id, name, last_name, email, role, created_at FROM users WHERE id = $1",
     [req.userId]
   );
 
