@@ -7,7 +7,9 @@ import { API_URL } from '../config'
 interface User {
   id: number
   name: string
+  last_name: string
   email: string
+  role: string
 }
 
 const steps = [
@@ -29,7 +31,8 @@ function HomePage() {
           headers: { Authorization: `Bearer ${token}` },
         })
 
-        if (response.status === 401) {
+                // 401 = sesión inválida · 403 = cuenta bloqueada
+        if (response.status === 401 || response.status === 403) {
           localStorage.removeItem('token')
           navigate('/login', { replace: true })
           return
@@ -48,7 +51,7 @@ function HomePage() {
   const firstName = user?.name.split(' ')[0]
 
   return (
-    <AppLayout userName={user?.name}>
+    <AppLayout userName={user ? `${user.name} ${user.last_name}`.trim() : undefined} isAdmin={user?.role === 'admin'}>
       {/* Bienvenida */}
       <section className="rounded-3xl bg-primary p-8 text-white shadow-2xl shadow-primary/20 dark:bg-primary/25 sm:p-10">
         <div className="mb-6 h-1.5 w-16 rounded-full bg-contrast" />

@@ -4,12 +4,14 @@ import { difficultyLabels, type Letter } from '../data/letters'
 
 interface LetterModalProps {
   letter: Letter
+    // true si ya la completó en el modo prueba
+  completed?: boolean
   onClose: () => void
   onPrev?: () => void
   onNext?: () => void
 }
 
-function LetterModal({ letter, onClose, onPrev, onNext }: LetterModalProps) {
+function LetterModal({ letter, completed = false, onClose, onPrev, onNext }: LetterModalProps) {
   // Bloquea el scroll de la página de atrás mientras el modal está abierto
   useEffect(() => {
     document.body.style.overflow = 'hidden'
@@ -91,9 +93,16 @@ function LetterModal({ letter, onClose, onPrev, onNext }: LetterModalProps) {
 
             <p className="text-black/80 dark:text-white/80">{letter.description}</p>
 
-            <span className="mt-4 w-fit rounded-full bg-contrast/20 px-3 py-1 text-sm font-semibold text-black dark:text-white">
-              {difficultyLabels[letter.difficulty]}
-            </span>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="w-fit rounded-full bg-contrast/20 px-3 py-1 text-sm font-semibold text-black dark:text-white">
+                {difficultyLabels[letter.difficulty]}
+              </span>
+              {completed && (
+                <span className="w-fit rounded-full bg-contrast px-3 py-1 text-sm font-semibold text-white dark:text-black">
+                  Completada ✓
+                </span>
+              )}
+            </div>
 
             <Link
               to={`/practice/${letter.letter}`}

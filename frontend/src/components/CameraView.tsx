@@ -1,13 +1,19 @@
 import { useCamera } from '../hooks/useCamera'
 import { useHandLandmarker } from '../hooks/useHandLandmarker'
 import { useHandDetection } from '../hooks/useHandDetection'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { HandLandmarker, type NormalizedLandmark } from '@mediapipe/tasks-vision'
 import { useSignModel } from '../hooks/useSignModel'
+import { useMotionModel } from '../hooks/useMotionModel'
+import { letters } from '../data/letters'
+import { addFrame, buildSequence, type Frame } from '../utils/sequence'
 
 // Cuánto tiempo hay que sostener la seña y con qué confianza mínima
 const HOLD_MS = 1000
-const MIN_CONFIDENCE = 0.8
+const MIN_CONFIDENCE = 0.9
+// Señas con movimiento: cada cuánto se revisa y cuántos aciertos seguidos se piden
+const MOTION_CHECK_MS = 200
+const MOTION_HITS = 3
 
 interface CameraViewProps {
   // Se llama cada vez que llegan puntos nuevos (null si no hay mano)
@@ -28,8 +34,11 @@ function CameraView({ onLandmarks, targetLetter, active = true, onSuccess }: Cam
 
     // Predicción del modelo (solo si se está practicando una letra y hay mano)
   const { status: signStatus, predict } = useSignModel()
-  const prediction =
-    targetLetter && landmarks && signStatus === 'ready' ? predict(landmarks) : null
+    // ¿La letra lleva movimiento? (las que tienen video: J, K, LL, Ñ, Q, X, Z)
+  const isMotion = Boolean(letters.find((item) => item.letter === targetLetter)?.video_url)
+  const { status: motionStatus, predict: predictMotion } = useMotionModel()
+    const prediction =
+    targetLetter && !isMotion && landmarks && signStatus === 'ready' ? predict(landmarks) : null
   // ¿La mano está haciendo la letra correcta con suficiente confianza?
   const isMatch =
     prediction !== null &&
@@ -86,9 +95,65 @@ function CameraView({ onLandmarks, targetLetter, active = true, onSuccess }: Cam
     }
   }, [landmarks, isMatch, success, active, confidence])
 
+    // --- Señas con movimiento ---
+  // Cuadros de los últimos 1.5 s, momento de la última revisión y confianzas de los aciertos seguidos
+  const motionFrames = useRef<Frame[]>([])
+  const lastMotionCheck = useRef(0)
+  const motionHits = useRef<number[]>([])
+
+  // useEffectEvent: lee siempre los valores más recientes sin volver a ejecutar el efecto
+  const checkMotion = useEffectEvent(() => {
+    if (!isMotion || success || motionStatus !== 'ready') return
+
+    // Durante la cuenta 3-2-1 no se guarda nada, para que no cuente un movimiento anterior
+    if (!active) {
+      motionFrames.current = []
+      motionHits.current = []
+      return
+    }
+    if (!landmarks) return
+
+    // 1. Guarda el cuadro (se borran solos los de hace más de 1.5 s)
+    const now = performance.now()
+    addFrame(motionFrames.current, { time: now, landmarks })
+
+    // 2. Solo revisa cada 200 ms, para no trabar el video
+    if (now - lastMotionCheck.current < MOTION_CHECK_MS) return
+    lastMotionCheck.current = now
+
+    const sequence = buildSequence(motionFrames.current)
+    if (!sequence) return
+    const result = predictMotion(sequence)
+
+    // 3. Cuenta aciertos seguidos; si falla uno, vuelve a empezar
+    if (result && result.label === targetLetter && result.confidence >= MIN_CONFIDENCE) {
+      motionHits.current.push(result.confidence)
+    } else {
+      motionHits.current = []
+    }
+
+    // 4. Con 2 aciertos seguidos es correcto. Se vacía todo para que no cuente doble
+    if (motionHits.current.length >= MOTION_HITS) {
+      const list = motionHits.current
+      const average = list.reduce((sum, value) => sum + value, 0) / list.length
+      motionFrames.current = []
+      motionHits.current = []
+
+      if (onSuccessRef.current) onSuccessRef.current(average)
+      else setSuccess(true)
+    }
+  })
+
+  // Revisa el movimiento cada vez que llegan puntos nuevos o cambia active
+  useEffect(() => {
+    checkMotion()
+  }, [landmarks, active])
+
   function retry() {
     holdStart.current = null
     holdConfidences.current = [] // NUEVO
+    motionFrames.current = []
+    motionHits.current = []
     setHoldProgress(0)
     setSuccess(false)
   }
@@ -180,14 +245,25 @@ function CameraView({ onLandmarks, targetLetter, active = true, onSuccess }: Cam
       />
 
             {/* Barra de progreso: se llena mientras sostienes la seña correcta */}
-            {targetLetter && signStatus === 'ready' && active && !success && (
+            {targetLetter && (isMotion ? motionStatus : signStatus) === 'ready' && active && !success && (
         <div className="absolute inset-x-0 bottom-0">
           <p className="mb-2 ml-3 inline-block rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
-            {isMatch ? '¡Así! Mantenla…' : landmarks ? 'Ajusta tu mano' : 'Haz la seña'}
+            {isMotion
+              ? landmarks
+                ? 'Haz el movimiento'
+                : 'Muestra tu mano'
+              : isMatch
+                ? '¡Así! Mantenla…'
+                : landmarks
+                  ? 'Ajusta tu mano'
+                  : 'Haz la seña'}
           </p>
-          <div className="h-2 bg-black/40">
-            <div className="h-full bg-contrast" style={{ width: `${holdProgress * 100}%` }} />
-          </div>
+                    {/* La barra solo aplica a letras fijas (las de movimiento no se sostienen) */}
+          {!isMotion && (
+            <div className="h-2 bg-black/40">
+              <div className="h-full bg-contrast" style={{ width: `${holdProgress * 100}%` }} />
+            </div>
+          )}
         </div>
       )}
 

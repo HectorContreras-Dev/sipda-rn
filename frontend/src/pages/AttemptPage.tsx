@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import AppLayout from '../components/AppLayout'
 import CameraView from '../components/CameraView'
 import { letters } from '../data/letters'
+import { API_URL } from '../config'
 
 const COUNTDOWN_S = 3 // Cuenta antes de empezar
 const TIME_LIMIT_S = 6 // Tiempo para lograr la seña
@@ -26,17 +27,41 @@ function AttemptPage() {
   const [history, setHistory] = useState<AttemptResult[]>([])
   const lastResult = history.at(-1)
   const correctCount = history.filter((item) => item.isCorrect).length
+    // true si el último intento no se pudo guardar en el servidor
+  const [saveError, setSaveError] = useState(false)
 
   function start() {
     setCount(COUNTDOWN_S)
     setPhase('countdown')
   }
 
+    // Guarda el intento en el backend. No detiene la pantalla: si falla, solo muestra un aviso
+  async function saveAttempt(result: AttemptResult) {
+    if (!currentLetter) return
+    try {
+      const response = await fetch(`${API_URL}/api/attempts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({
+          letter_id: currentLetter.id,
+          is_correct: result.isCorrect,
+          confidence: result.confidence,
+        }),
+      })
+      setSaveError(!response.ok)
+    } catch {
+      setSaveError(true)
+    }
+  }
+
   // Termina el intento (acierto o tiempo agotado)
   function finish(result: AttemptResult) {
-    // Fase 6: aquí se mandará el intento al backend (POST /api/attempts)
     setHistory((previous) => [...previous, result])
     setPhase('done')
+    saveAttempt(result)
   }
 
   // useEffectEvent: permite llamar a finish desde el efecto
@@ -166,7 +191,9 @@ function AttemptPage() {
             <h1 className="text-7xl font-extrabold leading-tight   text-primary">{currentLetter.letter}</h1>
             <div className="my-4 h-1.5 w-16 rounded-full bg-contrast" />
             <p className="text-black/80 dark:text-white/80">
-              Cuando termine la cuenta, haz la seña y sostenla 1 segundo. Tienes {TIME_LIMIT_S} segundos.
+              {currentLetter.video_url
+                ? `Cuando termine la cuenta, haz el movimiento de la seña. Tienes ${TIME_LIMIT_S} segundos.`
+                : `Cuando termine la cuenta, haz la seña y sostenla 1 segundo. Tienes ${TIME_LIMIT_S} segundos.`}
             </p>
           </div>
 
@@ -180,6 +207,11 @@ function AttemptPage() {
               <p className="text-sm font-semibold text-black dark:text-white">Aciertos</p>
             </div>
           </div>
+                    {saveError && (
+            <p role="alert" className="rounded-lg border-l-4 border-black bg-black/5 px-4 py-3 text-sm font-medium text-black dark:border-white dark:bg-white/10 dark:text-white">
+              ✕ No se pudo guardar el último intento. Revisa tu conexión.
+            </p>
+          )}
         </aside>
       </div>
     </AppLayout>

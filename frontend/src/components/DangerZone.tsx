@@ -3,9 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import Input from './Input'
 import { API_URL } from '../config'
 
-// Zona de peligro del perfil: borrar progreso (pendiente) y eliminar cuenta
-function DangerZone() {
+// Zona de peligro del perfil: borrar progreso y eliminar cuenta
+function DangerZone({ onProgressReset }: { onProgressReset?: () => void }) {
   const navigate = useNavigate()
+  // Borrar progreso: confirmando, borrando y mensaje del resultado
+  const [confirmingReset, setConfirmingReset] = useState(false)
+  const [resetting, setResetting] = useState(false)
+  const [resetMessage, setResetMessage] = useState('')
+  // Eliminar cuenta
   const [confirming, setConfirming] = useState(false)
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -48,25 +53,86 @@ function DangerZone() {
     }
   }
 
+  async function handleResetProgress() {
+    setResetting(true)
+    setResetMessage('')
+    try {
+      const response = await fetch(`${API_URL}/api/progress`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      })
+      if (response.status === 204) {
+        setResetMessage('✓ Tu progreso se borró.')
+        setConfirmingReset(false)
+        onProgressReset?.()
+      } else {
+        setResetMessage('✕ No se pudo borrar tu progreso.')
+      }
+    } catch {
+      setResetMessage('✕ No se pudo conectar con el servidor. Intenta más tarde.')
+    } finally {
+      setResetting(false)
+    }
+  }
+
   return (
     <section className="mt-10 rounded-3xl border border-secondary/40 bg-white p-6 shadow-lg shadow-primary/10 dark:bg-primary/10 dark:shadow-black/60">
       <h2 className="text-xl font-extrabold text-black dark:text-white">Progreso y cuenta</h2>
 
-      {/* Borrar progreso: pendiente hasta que existan los endpoints de progreso (Fase 6) */}
-      <div className="mt-5 flex flex-col gap-3 border-t border-secondary/30 pt-5 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="font-semibold text-black dark:text-white">Borrar progreso</p>
-          <p className="text-sm text-black/60 dark:text-white/60">
-            Reinicia tus intentos y letras completadas. Tu cuenta se conserva.
-          </p>
+            {/* Borrar progreso: borra intentos y resultados, la cuenta se conserva */}
+      <div className="mt-5 border-t border-secondary/30 pt-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-semibold text-black dark:text-white">Borrar progreso</p>
+            <p className="text-sm text-black/60 dark:text-white/60">
+              Reinicia tus intentos y letras completadas. Tu cuenta se conserva.
+            </p>
+          </div>
+          {!confirmingReset && (
+            <button
+              type="button"
+              onClick={() => {
+                setConfirmingReset(true)
+                setResetMessage('')
+              }}
+              className="shrink-0 cursor-pointer rounded-xl border-2 border-red-700 px-4 py-2 text-sm font-bold text-red-700 transition hover:bg-red-700 hover:text-white dark:border-red-400 dark:text-red-400 dark:hover:bg-red-400 dark:hover:text-black"
+            >
+              Borrar progreso
+            </button>
+          )}
         </div>
-        <button
-          type="button"
-          disabled
-          className="shrink-0 cursor-not-allowed rounded-xl border-2 border-black/20 px-4 py-2 text-sm font-bold text-black/40 dark:border-white/20 dark:text-white/40"
-        >
-          Próximamente
-        </button>
+
+        {/* Confirmación: no pide contraseña porque la cuenta no se borra */}
+        {confirmingReset && (
+          <div className="mt-5 flex flex-col gap-4 rounded-2xl bg-red-700/5 p-5 dark:bg-red-400/10">
+            <p className="text-sm font-medium text-black dark:text-white">
+              ¿Seguro? Se borrarán todos tus intentos y letras completadas. No se puede deshacer.
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <button
+                type="button"
+                onClick={handleResetProgress}
+                disabled={resetting}
+                className="cursor-pointer rounded-xl bg-red-700 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-red-400 dark:text-black dark:hover:bg-red-300"
+              >
+                {resetting ? 'Borrando…' : 'Sí, borrar mi progreso'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmingReset(false)}
+                className="cursor-pointer rounded-xl px-4 py-2 text-sm font-bold text-black transition hover:bg-secondary/20 dark:text-white"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        )}
+
+        {resetMessage && (
+          <p role="status" className="mt-3 text-sm font-medium text-black dark:text-white">
+            {resetMessage}
+          </p>
+        )}
       </div>
 
       {/* Eliminar cuenta */}
